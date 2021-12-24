@@ -1,7 +1,7 @@
 # InfiniteScroll
 
 This is a small project to test out Angular's virtual scrolling module.  
-This demo allows someone to search any accounts' historic transactions on the banano blockchain and scroll through with ease.  Pagination is cool but virtual scrolling is cooler; once a user stops scrolling for a split second, the next page of transactions is fetched via an api. 
+This demo searches individual accounts' historic transactions on the banano blockchain and scroll through with ease.  Pagination is cool but virtual scrolling is cooler; once a user stops scrolling for a split second, the next page of transactions is fetched via an api. 
 
 Check out the live demo [here](https://infinite-ban-scroll.web.app/); provided below are sample addresses with large transaction history:
 
