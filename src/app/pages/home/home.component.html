@@ -1,0 +1,66 @@
+<div class="app-root">
+    <mat-toolbar color="primary" class="mat-elevation-z2 app-toolbar">
+        <div [style.marginLeft.px]="isSmall() ? 8 : 24">Infinite Scroll Proof-of-Concept</div>
+    </mat-toolbar>
+    <div class="app-body">
+        <div class="app-body-content">
+            <div class="mat-display-1" style="margin-bottom: 16px">Search Account History</div>
+
+            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 48px">
+                <input type="text" [(ngModel)]="address" placeholder="address" />
+                <button [disabled]='loading' mat-flat-button color="primary" (click)="search()" style="width: 100px; margin-left: 32px">
+                    Search
+                </button>
+            </div>
+
+            <div class="mat-body-1">Transactions</div>
+
+            <cdk-virtual-scroll-viewport itemSize="50" class="example-viewport">
+                <div *cdkVirtualFor="let item of ds; let i = index; let even = even" class="example-item">
+                    <blui-info-list-item
+                        *ngIf="item"
+                        style="height: 50px"
+                        [style.backgroundColor]="even ? colors.white[100] : colors.white[50]"
+                    >
+                        <div blui-icon>
+                            <mat-icon *ngIf="item.type === 'receive'" [style.color]="colors.green[500]"
+                                >add_circle_outline</mat-icon
+                            >
+                            <mat-icon *ngIf="item.type === 'send'" [style.color]="colors.red[500]"
+                                >remove_circle_outline</mat-icon
+                            >
+                            <mat-icon *ngIf="item.type === 'change'" [style.color]="colors.blue[500]"
+                                >change_history</mat-icon
+                            >
+                        </div>
+                        <div blui-title>{{ item.type }}</div>
+                        <div blui-subtitle>{{ item.amount }}</div>
+                        <div blui-right-content>
+                            <span *ngIf="item.type === 'receive'">from </span>
+                            <span *ngIf="item.type === 'send' || item.type === 'change'">to </span>
+                            <span [style.marginLeft.px]="8" [style.color]="colors.green[500]">
+                                <ng-container *ngIf="item.type === 'receive' || item.type === 'send'">
+                                    {{ aliasMap.get(item.address) || shortenAddress(item.address) }}
+                                </ng-container>
+                                <ng-container *ngIf="item.type === 'change'">
+                                    {{ aliasMap.get(item.newRepresentative) || shortenAddress(item.newRepresentative) }}
+                                </ng-container>
+                            </span>
+                            <span [style.marginLeft.px]="32">tx #{{ numberWithCommas(blockCount - i) }}</span>
+                        </div>
+                    </blui-info-list-item>
+
+                    <blui-info-list-item *ngIf="!item" style="height: 50px">
+                        <div blui-icon>
+                            <mat-icon>sync</mat-icon>
+                        </div>
+                        <div blui-title>Loading</div>
+                        <div blui-right-content>
+                            <span [style.marginLeft.px]="32">tx #{{ numberWithCommas(blockCount - i) }}</span>
+                        </div>
+                    </blui-info-list-item>
+                </div>
+            </cdk-virtual-scroll-viewport>
+        </div>
+    </div>
+</div>
