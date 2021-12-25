@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Component, OnInit } from '@angular/core';
 import * as Colors from '@brightlayer-ui/colors';
 import { ViewportService } from '../../services/viewport.service';
@@ -5,6 +6,7 @@ import { ApiService } from '../../services/api.service';
 import { CollectionViewer, DataSource } from '@angular/cdk/collections';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
+import { BananoService, BananoWindow } from '../../services/banano.service';
 
 export type KnownAccount = {
     address: string;
@@ -36,9 +38,11 @@ export class HomeComponent implements OnInit {
     loading = false;
     aliasMap = new Map<string, string>();
 
-    items = Array.from({ length: 100000 }).map((_, i) => `Item #${i}`);
-
-    constructor(private readonly _viewportService: ViewportService, private _apiService: ApiService) {}
+    constructor(
+        private readonly _viewportService: ViewportService,
+        private _apiService: ApiService,
+        private _bananoService: BananoService
+    ) {}
 
     ngOnInit(): void {
         this._apiService.getAliases().then((known) => {
@@ -60,6 +64,95 @@ export class HomeComponent implements OnInit {
         return this._viewportService.isSmall();
     }
 
+    async ledger(): Promise<void> {
+        try {
+            await this.checkLedgerOrError();
+        } catch (error) {
+            console.trace(error);
+        }
+    }
+
+    async checkLedgerOrError(): Promise<void> {
+        const ACCOUNT_INDEX = 0;
+        const MAX_PENDING = 10;
+
+        console.log(window);
+
+        const config = window.bananocoinBananojsHw.bananoConfig;
+        window.bananocoinBananojs.setBananodeApiUrl(config.bananodeUrl);
+        const accountInfoElt = document.getElementById('account');
+        const TransportWebUSB = window.TransportWebUSB;
+        const isSupportedFlag = await TransportWebUSB.isSupported();
+        console.log('connectLedger', 'isSupportedFlag', isSupportedFlag);
+        if (isSupportedFlag) {
+            const accountData = await window.bananocoin.bananojsHw.getLedgerAccountData(ACCOUNT_INDEX);
+            console.log('connectLedger', 'accountData', accountData);
+            const account = accountData.account;
+            accountInfoElt.innerText = account;
+
+            const accountInfo = await window.bananocoinBananojs.getAccountInfo(account, true);
+            console.log('connectLedger', 'accountInfo', accountInfo);
+            if (accountInfo.error !== undefined) {
+                accountInfoElt.innerText = accountInfo.error;
+            } else {
+                const balanceParts = await window.bananocoinBananojs.getBananoPartsFromRaw(accountInfo.balance);
+                const balanceDescription = await window.bananocoinBananojs.getBananoPartsDescription(balanceParts);
+                accountInfoElt.innerText += '\nBalance ' + balanceDescription;
+
+                if (balanceParts.raw == '0') {
+                    delete balanceParts.raw;
+                }
+
+                const bananoDecimal = await window.bananocoinBananojs.getBananoPartsAsDecimal(balanceParts);
+                const withdrawAmountElt = document.querySelector('#withdrawAmount') as HTMLInputElement;
+                withdrawAmountElt.value = bananoDecimal;
+                const withdrawAccountElt = document.querySelector('#withdrawAccount') as HTMLInputElement;
+                withdrawAccountElt.value = account;
+            }
+
+            console.log('banano checkpending accountData', account);
+
+            const pendingResponse = await window.bananocoinBananojs.getAccountsPending([account], MAX_PENDING, true);
+            console.log('banano checkpending pendingResponse', pendingResponse);
+            accountInfoElt.innerText += '\n';
+            accountInfoElt.innerText += JSON.stringify(pendingResponse);
+            const pendingBlocks = pendingResponse.blocks[account];
+
+            const hashes = [...Object.keys(pendingBlocks)];
+            if (hashes.length !== 0) {
+                const specificPendingBlockHash = hashes[0];
+
+                const accountSigner = await window.bananocoin.bananojsHw.getLedgerAccountSigner(ACCOUNT_INDEX);
+
+                const bananodeApi = window.bananocoinBananojs.bananodeApi;
+                let representative = await bananodeApi.getAccountRepresentative(account);
+                if (!representative) {
+                    representative = account;
+                }
+                console.log('banano checkpending config', config);
+
+                const loggingUtil = window.bananocoinBananojs.loggingUtil;
+                const depositUtil = window.bananocoinBananojs.depositUtil;
+
+                accountInfoElt.innerText += '\n';
+                accountInfoElt.innerText += 'CHECK LEDGER FOR BLOCK ' + specificPendingBlockHash;
+
+                const receiveResponse = await depositUtil.receive(
+                    loggingUtil,
+                    bananodeApi,
+                    account,
+                    accountSigner,
+                    representative,
+                    specificPendingBlockHash,
+                    config.prefix
+                );
+
+                accountInfoElt.innerText += '\n';
+                accountInfoElt.innerText += JSON.stringify(receiveResponse);
+            }
+        }
+    }
+
     search(): void {
         this.loading = true;
         if (this.ds) {
@@ -73,15 +166,14 @@ export class HomeComponent implements OnInit {
         });
     }
 
-
-  numberWithCommas(x: number | string): string {
-    if (!x && x !== 0) {
-      return '';
+    numberWithCommas(x: number | string): string {
+        if (!x && x !== 0) {
+            return '';
+        }
+        const parts = x.toString().split('.');
+        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        return parts.join('.');
     }
-    const parts = x.toString().split('.');
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-    return parts.join('.');
-  }
 }
 
 export class MyDataSource extends DataSource<ConfirmedTx | undefined> {

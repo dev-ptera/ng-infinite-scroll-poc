@@ -4,11 +4,50 @@
     </mat-toolbar>
     <div class="app-body">
         <div class="app-body-content">
+            <button
+                [disabled]="loading"
+                mat-flat-button
+                color="primary"
+                (click)="ledger()"
+                style="width: 400px; margin-left: 32px"
+            >
+                Check Ledger Account & Pending
+            </button>
+
+            <input
+                id="withdrawAccount"
+                class="monospace small bg_white"
+                type="text"
+                size="66"
+                max_length="64"
+                value=""
+                defaultValue="To Account"
+            />
+
+            <input
+                id="withdrawAmount"
+                class="monospace small bg_white"
+                type="number"
+                size="66"
+                max_length="64"
+                min="0"
+                step="any"
+                value="0.0"
+            />
+
+          <!--
+
             <div class="mat-display-1" style="margin-bottom: 16px">Search Account History</div>
 
             <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 48px">
                 <input type="text" [(ngModel)]="address" placeholder="address" />
-                <button [disabled]='loading' mat-flat-button color="primary" (click)="search()" style="width: 100px; margin-left: 32px">
+                <button
+                    [disabled]="loading"
+                    mat-flat-button
+                    color="primary"
+                    (click)="search()"
+                    style="width: 100px; margin-left: 32px"
+                >
                     Search
                 </button>
             </div>
@@ -62,5 +101,6 @@
                 </div>
             </cdk-virtual-scroll-viewport>
         </div>
+        -->
     </div>
 </div>
