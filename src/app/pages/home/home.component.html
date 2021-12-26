@@ -3,6 +3,9 @@
         <div [style.marginLeft.px]="isSmall() ? 8 : 24">Infinite Scroll Proof-of-Concept</div>
     </mat-toolbar>
     <div class="app-body">
+
+      <div id="account" class="break_all"></div>
+
         <div class="app-body-content">
             <button
                 [disabled]="loading"
@@ -14,6 +17,17 @@
                 Check Ledger Account & Pending
             </button>
 
+
+
+          <button
+            [disabled]="loading"
+            mat-flat-button
+            color="primary"
+            (click)="withdraw()"
+            style="width: 400px; margin-left: 32px"
+          >
+            Send
+          </button>
             <input
                 id="withdrawAccount"
                 class="monospace small bg_white"
@@ -34,6 +48,9 @@
                 step="any"
                 value="0.0"
             />
+
+          <div id="withdrawResponse" class="monospace small bordered bg_lightgreen selectable">
+          </div>
 
           <!--
 

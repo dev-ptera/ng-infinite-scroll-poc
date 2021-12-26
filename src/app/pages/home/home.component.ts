@@ -153,6 +153,33 @@ export class HomeComponent implements OnInit {
         }
     }
 
+
+    async withdraw() {
+
+      const ACCOUNT_INDEX = 0;
+      const MAX_PENDING = 10;
+
+      const withdrawAccountElt = document.querySelector('#withdrawAccount');
+      const withdrawAmountElt = document.querySelector('#withdrawAmount');
+      const withdrawResponseElt = document.querySelector('#withdrawResponse');
+      const withdrawAccount = withdrawAccountElt.value;
+      const withdrawAmount = withdrawAmountElt.value;
+      const accountSigner = await window.bananocoin.bananojsHw.getLedgerAccountSigner(ACCOUNT_INDEX);
+      const bananodeApi = window.bananocoinBananojs.bananodeApi;
+      const bananoUtil = window.bananocoinBananojs.bananoUtil;
+      const config = window.bananocoinBananojsHw.bananoConfig;
+      try {
+        const amountRaw = window.bananocoinBananojs.getBananoDecimalAmountAsRaw(withdrawAmount);
+        withdrawResponseElt.innerText = 'CHECK LEDGER FOR SEND BLOCK APPROVAL';
+        const response = await bananoUtil.sendFromPrivateKey(bananodeApi, accountSigner, withdrawAccount, amountRaw, config.prefix);
+        console.log('withdraw', 'response', response);
+        withdrawResponseElt.innerText = 'Response' + JSON.stringify(response);
+      } catch (error) {
+        console.log('withdraw', 'error', error);
+        withdrawResponseElt.innerText = 'Error:' + error.message;
+      }
+    }
+
     search(): void {
         this.loading = true;
         if (this.ds) {
