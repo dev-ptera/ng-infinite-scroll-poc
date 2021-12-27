@@ -1,0 +1,32 @@
+<ng-container *ngIf="accounts.length == 0">
+    <div class="mat-display-2">Loading...</div>
+</ng-container>
+
+<ng-container *ngIf="accounts.length > 0">
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px">
+        <button mat-flat-button color="primary" (click)="addAccount()" [disabled]="loadingAccount">
+            <mat-icon style="margin-right: 8px; margin-left: -4px">add</mat-icon>
+            <span>Add Account</span>
+        </button>
+    </div>
+    <mat-card>
+        <div style="margin-left: 16px; margin-bottom: 16px">
+            <span class="mat-subheading-1" style="margin-right: 8px">Accounts Balance: </span>{{ totalBalance }}
+        </div>
+        <mat-divider></mat-divider>
+        <mat-nav-list>
+            <blui-info-list-item
+                *ngFor="let account of accounts"
+                [statusColor]="isOnline(account.representative) ? undefined : colors.red[500]"
+                [hidePadding]="true"
+            >
+                <div blui-left-content style="min-width: 100px">
+                    <blui-list-item-tag [label]="'Account #' + account.index"></blui-list-item-tag>
+                </div>
+                <div blui-title>{{ account.shortAddress }}</div>
+                <div blui-subtitle>represented by {{ formatRepresentative(account.representative) }}</div>
+                <div blui-right-content>{{ account.formattedBalance }}</div>
+            </blui-info-list-item>
+        </mat-nav-list>
+    </mat-card>
+</ng-container>

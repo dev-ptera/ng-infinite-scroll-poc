@@ -21,10 +21,12 @@ import { HomeComponent } from './pages/home/home.component';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
-import { InfoListItemModule } from '@brightlayer-ui/angular-components';
+import { InfoListItemModule, ListItemTagModule } from '@brightlayer-ui/angular-components';
+import { MatCardModule } from '@angular/material/card';
+import { AccountComponent } from './pages/account/account.component';
 
 @NgModule({
-    declarations: [AppComponent, HomeComponent, PxbLogoComponent],
+    declarations: [AppComponent, HomeComponent, PxbLogoComponent, AccountComponent],
     imports: [
         BrowserModule,
         CommonModule,
@@ -37,6 +39,8 @@ import { InfoListItemModule } from '@brightlayer-ui/angular-components';
         ScrollingModule,
         FormsModule,
         InfoListItemModule,
+        MatCardModule,
+        ListItemTagModule,
     ],
     providers: [],
     bootstrap: [AppComponent],
